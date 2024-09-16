@@ -1,18 +1,17 @@
-use <scad-utils/morphology.scad> //for cheaper minwoski 
-use <scad-utils/transformations.scad>
-use <scad-utils/shapes.scad>
-use <scad-utils/trajectory.scad>
-use <scad-utils/trajectory_path.scad>
-use <sweep.scad>
-use <skin.scad>  
-//use <z-butt.scad>
+use <libraries/scad-utils/morphology.scad> //for cheaper minwoski 
+use <libraries/scad-utils/transformations.scad>
+use <libraries/scad-utils/shapes.scad>
+use <libraries/scad-utils/trajectory.scad>
+use <libraries/scad-utils/trajectory_path.scad>
+use <libraries/sweep.scad>
+use <libraries/skin.scad>  
 
 /*DES (Distorted Elliptical Saddle) Sculpted Profile for 6x3 and corne thumb 
 Version 2: Eliptical Rectangle
 
 */
 keycap(
-  keyID  = 0, //change profile refer to KeyParameters Struct
+  keyID  = 13, //change profile refer to KeyParameters Struct
   cutLen = 0, //Don't change. for chopped caps
   Stem   = true, //tusn on shell and stems
   Dish   = true, //turn on dish cut
@@ -20,14 +19,28 @@ keycap(
   visualizeDish = false, // turn on debug visual of Dish 
   crossSection  = false, // center cut to check internal
   homeDot = false, //turn on homedots
-  Legends = false
+  Legends = ["ESC",  "tab", "command.svg"]
 );
- 
+
+/*
+translate([19,0,0])
+keycap(
+  keyID  = 11, //change profile refer to KeyParameters Struct
+  cutLen = 0, //Don't change. for chopped caps
+  Stem   = true, //tusn on shell and stems
+  Dish   = true, //turn on dish cut
+  Stab   = 0, 
+  visualizeDish = false, // turn on debug visual of Dish 
+  crossSection  = false, // center cut to check internal
+  homeDot = false, //turn on homedots
+  Legends = ["Cmd", "Space"]
+);
+/**/
 //Parameters
 wallthickness = 1.5; // 1.5 for norm, 1.25 for cast master
 topthickness  = 2.9;   // 3 for norm, 2.5 for cast master
-stepsize      = 40;  //resolution of Trajectory
-step          = 6;   //resolution of ellipes 
+stepsize      = 60;  //resolution of Trajectory  больше - плавнее
+step          = 1;   //resolution of ellipes     меньше - плавнее
 fn            = 60;  //resolution of Rounded Rectangles: 60 for output, 16 for tests
 layers        = 50;  //resolution of vertical Sweep: 50 for output, 40 for tests
 dotRadius     = 0.55;   //home dot size
@@ -41,62 +54,38 @@ extra_vertical  = 0.6;
 StemBrimDep     = -0.85; //торчание стема
 stemLayers      = 50; //resolution of stem to cap top transition
 
-
-//BotWid - ширина основания
-//BotLen - длина основания
-//TWDif - уменьшение ширины в верхней части кнопки 
-//TLDif - уменьшение длины в верхней части кнопки 
-//keyh - высота 
-//WSft - смещение верхней части по Х 
-//LSft - смещение верхней части по У
-//XSkew - поворот верхнего диша вокруг оси Х (вперед-назад) 
-//YSkew - поворот верхнего диша вокруг оси У (вправо-влево)
-//ZSkew - поворот верхнего диша вокруг оси Z (по часовой-против часовой)
-//WEx - расширитель по ширине. работает странно на 1 делает прямые боковины, 2 по умолчанию, на 3 и больше вытягивает их какбы вверх
-//LEx - расширитель по длине
-//CapR0i - закругление северной и южной нижних граней 
-//CapR0f - закругление северной и южной верхних граней
-//CapR1i - закругление восточной и западной нижних граней
-//CapR1f - закругление восточной и западной верхних граней
-//CapREx - радиус вытяжения боковых граней вверх. чем больше, тем грани больше стремятся вверх и меньше скругляются
-//StemEx - не заметил изменений
+baseFont = "Menlo:style=Bold";
 
 keyParameters = //keyParameters[KeyID][ParameterID]
 [
 //  BotWid, BotLen, TWDif, TLDif, keyh, WSft, LSft  XSkew, YSkew, ZSkew, WEx, LEx, CapR0i, CapR0f, CapR1i, CapR1f, CapREx, StemEx
-//Column high sculpt 3 row system 
     // matrix
     [17.16,  17.16,   6.5, 	 6.5, 5.75,    0,    0,   -13,     0,     0,   2,   2,      1,      5,      1,    3.5,     2,       2], //R2 0
     [17.16,  17.16,   6.5, 	 6.5, 4.75,    0,   .5,     4,     0,     0,   2,   2,      1,      5,      1,    3.5,     2,       2], //R3 1
     [17.16,  17.16,   6.5, 	 6.5, 6.55,    0,    0,     9,     0,     0,   2,   2,      1,      5,      1,    3.5,     2,       2], //R4 2
     
-    // inner index column
+    // inner index column left
     [17.16,  17.16,   6.5, 	 6.5, 7.75,    0,    0,   -16,    12,     0,   2,   2,      1,      5,      1,    3.5,     2,       2], //R2 3
     [17.16,  17.16,   6.5, 	 6.5, 6.75,    0,   .5,     4,    12,     0,   2,   2,      1,      5,      1,    3.5,     2,       2], //R3 4
     [17.16,  17.16,   6.5, 	 6.5, 8.55,    0,    0,    18,    12,     0,   2,   2,      1,      5,      1,    3.5,     2,       2], //R4 5
+    
+    // inner index column right
+    [17.16,  17.16,   6.5, 	 6.5, 7.75,    0,    0,   -16,   -12,     0,   2,   2,      1,      5,      1,    3.5,     2,       2], //R2 6
+    [17.16,  17.16,   6.5, 	 6.5, 6.75,    0,   .5,     4,   -12,     0,   2,   2,      1,      5,      1,    3.5,     2,       2], //R3 7
+    [17.16,  17.16,   6.5, 	 6.5, 8.55,    0,    0,    18,   -12,     0,   2,   2,      1,      5,      1,    3.5,     2,       2], //R4 8
 
-    // thumb
-    [17.16,  17.16,     4, 	   6,   7,    0,    0,    -12,    10,    15,   2,   2,      1,      5,      1,      2,     2,       2], //outer  6  
-    [17.16,  17.16,     4, 	   5,   6,    0,    0,    -12,     0,     0,   2,   2,      1,      5,      1,      3,     2,       2], //center 7
-    [17.16,  17.16,     4, 	   5, 5.5,    0,    0,     -8,    -5,   -15,   2,   2,      1,   4.85,      1,      3,     2,       2], //inner  8
+    // thumb center
+    [17.16,  17.16,     4,     5,   6,    0,    0,    -12,     0,     0,   2,   2,      1,      5,      1,      3,     2,       2], //center 10
+
+    // thumb left
+    [17.16,  17.16,     4, 	   6,   7,    0,    0,    -12,    10,    15,   2,   2,      1,      5,      1,      2,     2,       2], //outer  9  
+    [17.16,  17.16,     4, 	   5, 5.5,    0,    0,     -8,    -5,   -15,   2,   2,      1,   4.85,      1,      3,     2,       2], //inner  11
+
+    // thumb right
+    [17.16,  17.16,     4, 	   6,   7,    0,    0,    -12,   -10,   -15,   2,   2,      1,      5,      1,      2,     2,       2], //outer  12 
+    [17.16,  17.16,     4, 	   5, 5.5,    0,    0,     -8,     5,    15,   2,   2,      1,   4.85,      1,      3,     2,       2], //inner  14
 ];
 
-//FFwd1 - расстояние до переднего загиба вниз
-//FFwd2 - радиус переднего загиба вниз
-//FPit1 - угол переднего загиба вверх
-//FPit2 - похоже на вытянутость диша вперед, я не понял это значение
-//DshDep - глубина диша
-//DshHDif - вдавливание диша вниз
-//FArcIn - ширина начала передней арки
-//FArcFn - ширина конца передней арки
-//FArcEx - похоже на расстояние до расширения
-//BFwd1 - расстояние до заднего загиба вниз
-//BFwd2 - радиус заднего загиба вниз
-//BPit1 - угол заднего загиба вверх
-//BPit2 - похоже на вытянутость диша назад
-//BArcIn - ширина начала передней арки
-//BArcFn - ширина конца передней арки
-//BArcEx - похоже на расстояние до расширения
 
 dishParameters = //dishParameter[keyID][ParameteID]
 [ 
@@ -106,18 +95,115 @@ dishParameters = //dishParameter[keyID][ParameteID]
   [   6,    3,   10,  -55,      5,    1.8,   8.5,    15,     2,        6,  3.7,   10,  -55,    8.5,    15,     2], //R3
   [   6,    3,   18,  -50,      5,    1.8,   8.8,    15,     2,      5.5,  4.4,    5,  -55,    8.8,    15,     2], //R4
   
-  // inner index column
-  [ 6.5,    3,   10,  -50,      5,    1.8,   8.8,    15,     2,        6,    4,   13,   30,    8.8,    16,     2], //R2
-  [   6,    3,   10,  -55,      5,    1.8,   8.5,    15,     2,        6,  3.7,   10,  -55,    8.5,    15,     2], //R3
-  [   6,    3,   18,  -50,      5,    1.8,   8.8,    15,     2,      5.8,  4.4,    5,  -55,    8.8,    15,     2], //R4
+  // inner index column left
+  [ 6.5,    3,   10,  -50,      5,    1.9,   8.8,    15,     2,        6,    4,   13,   30,    8.8,    16,     2], //R2
+  [   6,    3,   10,  -55,      5,    1.8,   8.9,    15,     2,        6,  3.7,   10,  -55,    8.9,    15,     2], //R3
+  [   6,    3,   18,  -50,      5,    1.8,   9.2,    15,     2,      5.8,  4.4,    5,  -55,    9.2,    15,     2], //R4
   
-  // thumb
-  [ 6.5,  4.8,    5,  -48,      4,    2.0,    11,    12,     2,        5,    4,    5,  -48,     11,    12,     2], //R5
-  [   6,  4.8,    5,  -48,      5,    2.2,  10.5,    10,     2,        6,    4,    0,  -30,   10.5,    18,     2], //R5
-  [ 6.5,  4.8,    5,  -48,      4,    2.0,   9.5,    10,     2,       10,    4,   13,  -30,    9.5,    20,     2], //R5
+  // inner index column right
+  [ 6.5,    3,   10,  -50,      5,    1.9,   8.8,    15,     2,        6,    4,   13,   30,    8.8,    16,     2], //R2
+  [   6,    3,   10,  -55,      5,    1.8,   8.9,    15,     2,        6,  3.7,   10,  -55,    8.9,    15,     2], //R3
+  [   6,    3,   18,  -50,      5,    1.8,   9.2,    15,     2,      5.8,  4.4,    5,  -55,    9.2,    15,     2], //R4
+  
+  // thumbs center
+  [   6,  4.8,    5,  -48,      5,    2.2,  10.5,    10,     2,        6,    4,    0,  -30,   10.5,    18,     2], //center
 
+  // thumb left
+  [ 6.5,  4.8,    5,  -48,      4,    2.0,    11,    12,     2,        5,    4,    5,  -48,     11,    12,     2], //outer
+  [ 6.5,  4.8,    5,  -48,      4,    2.0,   9.5,    10,     2,       10,    4,   13,  -30,    9.5,    20,     2], //inner
+  
+  // thumb right
+  [ 6.5,  4.8,    5,  -48,      4,    2.0,    11,    12,     2,        5,    4,    5,  -48,     11,    12,     2], //outer
+  [ 6.5,  4.8,    5,  -48,      4,    2.0,   9.5,    10,     2,       10,    4,   13,  -30,    9.5,    20,     2], //inner
 ];
- 
+
+legendParameters = //legendParameter[keyID][ParameteID]
+[ 
+//   XSkeAdj YSkeAdj ZSkeAdj XOffs YOffs   HAdj  FntSz      Font
+  // matrix
+  [ // 0 R2
+    [      5,      8,      0,   -3,    4,  -2.8,     4, baseFont],
+    [     -5,     -8,      0,    3,   -3,  -2.8,   3.5, baseFont],
+    [     -5,      8,      0,   -3,   -3,  -2.8,     3, baseFont],
+    [      5,     -8,      0,    3,    4,  -2.8,     3, baseFont],
+  ], 
+  [ // 1 R3
+    [      3,      9,      0,   -3,  2.5,  -2.5,     4, baseFont],
+    [     -3,     -8,      0,    3, -4.5,  -2.7,   3.5, baseFont],
+    [     -3,      8,      0,   -3, -4.5,  -2.7,     3, baseFont],
+    [      3,     -9,      0,    3,  2.5,  -2.5,     3, baseFont],
+  ], 
+  [ // 2 R4
+    [      1,      8,      0,   -3,  2.5,  -2.8,     4, baseFont],
+    [     -8,     -8,      0,    3, -4.5,  -3.1,   3.5, baseFont],
+    [     -8,      8,      0,   -3, -4.5,  -3.1,     3, baseFont],
+    [      1,     -8,      0,    3,  2.5,  -2.8,     3, baseFont],
+    [     85,      0,      0,    0,  1.3,   2.5,     3, baseFont],
+  ], 
+  
+  // inner index column left
+  [ // 3 R2
+    [      3,    -14,      0, -2.5,  4.5,  -3.0,     4, baseFont],
+    [     -5,    -31,      0,    4,   -3,  -3.2,   3.5, baseFont],
+  ], 
+  [ // 4 R3
+    [      3,    -14,      0, -2.5,  2.5,  -2.8,     4, baseFont],
+    [     -4,    -32,      0,    4, -4.5,  -3.1,   3.5, baseFont],
+  ], 
+  [ // 5 R4
+    [      2,    -14,      0, -2.5,    2,  -2.9,     4, baseFont],
+    [     -8,    -32,      0,  4.5, -5.5,  -3.7,   3.5, baseFont],
+  ], 
+  
+  // inner index column right
+  [ // 6 R2
+    [      5,     31,      0, -4.5,  4.5,  -3.4,     4, baseFont],
+    [     -5,     14,      0,    2,   -3,  -3.0,   3.5, baseFont],
+  ], 
+  [ // 7 R3
+    [      3,     32,      0, -4.5,  2.5,  -2.9,     4, baseFont],
+    [     -4,     15,      0,    2, -4.5,  -2.9,   3.5, baseFont],
+  ], 
+  [ // 8 R4
+    [      2,     32,      0, -4.5,    2,  -3.3,     4, baseFont],
+    [     -8,     15,      0,  2.5, -5.5,  -3.5,   3.5, baseFont],
+  ], 
+  
+  [ // 9 thumb center
+    [     -1,      0,      0,    0,    4,  -2.5,     3, baseFont],
+    [     -3,      0,      0,    0, -3.5,  -2.6,   2.5, baseFont],
+  ], 
+
+  // thumb left
+  [ // 10 outer
+    [      3,    -20,      0,  0.6,    4,  -2.5,     3, baseFont],
+    [     -3,    -19,      0,  0.6, -3.5,  -2.8,   2.5, baseFont],
+  ], 
+  [ // 11 inner
+    [      5,     10,      0, -0.6,  4.5,  -2.5,     3, baseFont],
+    [     -3,     11,      0, -0.6, -3.5,  -2.7,   2.5, baseFont],
+  ], 
+  
+  // thumb right
+  [ // 12 outer
+    [      3,     20,      0, -1.3,    4,  -2.5,     3, baseFont],
+    [     -3,     21,      0, -1.3, -3.5,  -2.8,   2.5, baseFont],
+  ], 
+  [ // 13 inner
+    [      5,    -10,      0,    0,  4.5,  -2.6,     3, baseFont],
+    [     -3,    -11,      0,  0.6, -3.5,  -2.7,   2.5, baseFont],
+  ], 
+];
+
+function LegendXAngleSkewAdjustment(keyID, legend) = legendParameters[keyID][legend][0];
+function LegendYAngleSkewAdjustment(keyID, legend) = legendParameters[keyID][legend][1];
+function LegendZAngleSkewAdjustment(keyID, legend) = legendParameters[keyID][legend][2];
+function LegendXOffset(keyID, legend)              = legendParameters[keyID][legend][3];
+function LegendYOffset(keyID, legend)              = legendParameters[keyID][legend][4];
+function LegendHeightAdjustment(keyID, legend)     = legendParameters[keyID][legend][5];
+function LegendFontSize(keyID, legend)             = legendParameters[keyID][legend][6];
+function LegendFont(keyID, legend)                 = legendParameters[keyID][legend][7];
+
 function FrontForward1(keyID) = dishParameters[keyID][0];  //
 function FrontForward2(keyID) = dishParameters[keyID][1];  // 
 function FrontPitch1(keyID)   = dishParameters[keyID][2];  //
@@ -250,6 +336,35 @@ function StemTransform(t, keyID) =
 function StemRadius(t, keyID) = pow(t/stemLayers,3)*3 + (1-pow(t/stemLayers, 3))*1;
   //Stem Exponent 
 
+function endsWithSvg(str) =
+  len(str) > 5 && search(".svg", str);
+
+module drawLegend(legend, legendID, keyID) {
+  if (legend && legendParameters[keyID][legendID]) {
+    rotateX = -XAngleSkew(keyID) + LegendXAngleSkewAdjustment(keyID, legendID);
+    rotateY = YAngleSkew(keyID) + LegendYAngleSkewAdjustment(keyID, legendID);
+    rotateZ = -ZAngleSkew(keyID) + LegendZAngleSkewAdjustment(keyID, legendID); 
+    translateX = LegendXOffset(keyID, legendID);
+    translateY = LegendYOffset(keyID, legendID);
+    translateZ = KeyHeight(keyID) + LegendHeightAdjustment(keyID, legendID);
+    font = LegendFont(keyID, legendID);
+    fontSize = is_list(legend) ? legend[1] : LegendFontSize(keyID, legendID);
+    svgScale = fontSize * 0.2362; // dpi / square size / 25.4
+    
+    legend = is_string(legend) ? legend : legend[0];
+  
+    rotate([rotateX, rotateY, rotateZ])
+      translate([translateX, translateY, translateZ])
+        linear_extrude(height = 1) {
+          if (endsWithSvg(legend))
+            scale([svgScale, svgScale, 1]) 
+              import(file = str("symbols/", legend), center = true, dpi = 96);
+          else
+            text(text = legend, font = font, size = fontSize, valign = "center", halign = "center");
+        }
+  }
+  
+}
 
 ///----- KEY Builder Module
 module keycap(keyID = 0, cutLen = 0, visualizeDish = false, rossSection = false, Dish = true, Stem = false, crossSection = true,Legends = false, homeDot = false, Stab = 0) {
@@ -290,10 +405,9 @@ module keycap(keyID = 0, cutLen = 0, visualizeDish = false, rossSection = false,
     //Cuts
     
     //Fonts
-    if(Legends ==  true){
-//          #rotate([-XAngleSkew(keyID),YAngleSkew(keyID),ZAngleSkew(keyID)])
-      translate([0,0,KeyHeight(keyID)-5])linear_extrude(height =5)text( text = "A", font = "Calibri:style=Bold", size = 4, valign = "center", halign = "center" );
-      //  #rotate([-XAngleSkew(keyID),YAngleSkew(keyID),ZAngleSkew(keyID)])translate([0,-3.5,0])linear_extrude(height = 0.5)text( text = "Me", font = "Constantia:style=Bold", size = 3, valign = "center", halign = "center" );
+    if(Legends && len(Legends) > 0){
+      for (legend = [0:len(Legends)])
+        drawLegend(Legends[legend], legend, keyID);
       }
    //Dish Shape 
     if(Dish == true){
@@ -326,6 +440,7 @@ module keycap(keyID = 0, cutLen = 0, visualizeDish = false, rossSection = false,
   //Homing dot
   
 }
+
 //------------------stems 
 
 MXWid = 4.03/2+Tol; //horizontal lenght
